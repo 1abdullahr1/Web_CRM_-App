@@ -19,6 +19,28 @@
         .actions.active .menu { display: block; }
         .menu button { background: none; border: none; padding: 8px; cursor: pointer; width: 100%; text-align: left; }
         button, .export-btn { padding: 10px; background-color: #40c4ff; border: none; color: white; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; }
+ .actions .menu {
+    display: none;
+    position: absolute;
+    top: 25px;
+    right: 0;
+    background: #333; /* Dark background to contrast with white text */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    z-index: 1;
+}
+
+.actions .menu button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    color: white; /* Sets text color to white */
+    line-height: 0.5; /* Reduces line spacing */
+}
+
     </style>
 </head>
 <body>
