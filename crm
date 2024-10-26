@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Web App</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f7f9fc; color: #333; }
+        .container { width: 60%; margin: auto; padding-top: 30px; }
+        .header, .form, .entry, .search-bar { background-color: #e0f7ff; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+        .header h2 { margin: 0; color: #007bb5; }
+        .form input, .search-bar input { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #b2ebf2; }
+        .search-bar input[type="text"] { width: 85%; display: inline-block; }
+        .search-bar button { width: 12%; padding: 10px; background-color: #40c4ff; border: none; color: white; border-radius: 8px; cursor: pointer; display: inline-block; }
+        .entry { display: flex; justify-content: space-between; align-items: center; padding: 10px; }
+        .actions { position: relative; display: inline-block; }
+        .actions .dots { cursor: pointer; font-size: 20px; }
+        .actions .menu { display: none; position: absolute; top: 25px; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; z-index: 1; }
+        .actions.active .menu { display: block; }
+        .menu button { background: none; border: none; padding: 8px; cursor: pointer; width: 100%; text-align: left; }
+        button, .export-btn { padding: 10px; background-color: #40c4ff; border: none; color: white; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>CRM Web App</h2>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search by name, number, email...">
+            <button onclick="searchEntries()">Find</button>
+        </div>
+        <div class="form">
+            <input id="fullName" placeholder="Full Name">
+            <input id="number" placeholder="Number">
+            <input id="email" placeholder="Email">
+            <input id="company" placeholder="Company">
+            <input id="note" placeholder="Note">
+            <button onclick="addEntry()">Add Entry</button>
+        </div>
+        <div id="entries"></div>
+        <button class="export-btn" onclick="exportData()">Export Data</button>
+    </div>
+
+    <script>
+        let entries = [];
+
+        function addEntry() {
+            const entry = {
+                id: entries.length + 1,
+                fullName: document.getElementById("fullName").value,
+                number: document.getElementById("number").value,
+                email: document.getElementById("email").value,
+                company: document.getElementById("company").value,
+                note: document.getElementById("note").value,
+            };
+            entries.push(entry);
+            renderEntries();
+            document.querySelectorAll('.form input').forEach(input => input.value = '');
+        }
+
+        function renderEntries() {
+            const entriesContainer = document.getElementById("entries");
+            entriesContainer.innerHTML = "";
+            entries.forEach((entry, index) => {
+                entry.id = index + 1; // Renumber entries
+                const entryDiv = document.createElement("div");
+                entryDiv.className = "entry";
+                entryDiv.innerHTML = `
+                    <div>
+                        <strong>${entry.id}. ${entry.fullName}</strong><br>
+                        ${entry.number}<br>
+                        ${entry.email}<br>
+                        ${entry.company}<br>
+                        ${entry.note}
+                    </div>
+                    <div class="actions" onclick="toggleMenu(event, ${index})">
+                        <span class="dots">⋮</span>
+                        <div class="menu">
+                            <button onclick="editEntry(${index})">Edit</button>
+                            <button onclick="duplicateEntry(${index})">Duplicate</button>
+                            <button onclick="removeEntry(${index})">Remove</button>
+                            <button onclick="viewEntry(${index})">View</button>
+                        </div>
+                    </div>
+                `;
+                entriesContainer.appendChild(entryDiv);
+            });
+        }
+
+        function toggleMenu(event, index) {
+            event.stopPropagation();
+            document.querySelectorAll(".actions").forEach((el, i) => {
+                if (i !== index) el.classList.remove("active");
+            });
+            event.currentTarget.classList.toggle("active");
+        }
+
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".actions").forEach(el => el.classList.remove("active"));
+        });
+
+        function editEntry(index) {
+            const entry = entries[index];
+            document.getElementById("fullName").value = entry.fullName;
+            document.getElementById("number").value = entry.number;
+            document.getElementById("email").value = entry.email;
+            document.getElementById("company").value = entry.company;
+            document.getElementById("note").value = entry.note;
+            entries.splice(index, 1);
+            renderEntries();
+        }
+
+        function duplicateEntry(index) {
+            entries.push({ ...entries[index] });
+            renderEntries();
+        }
+
+        function removeEntry(index) {
+            entries.splice(index, 1);
+            renderEntries();
+        }
+
+        function viewEntry(index) {
+            alert(JSON.stringify(entries[index], null, 2));
+        }
+
+        function searchEntries() {
+            const searchTerm = document.getElementById("search").value.toLowerCase();
+            const filteredEntries = entries.filter(entry => 
+                entry.fullName.toLowerCase().includes(searchTerm) ||
+                entry.number.toLowerCase().includes(searchTerm) ||
+                entry.email.toLowerCase().includes(searchTerm) ||
+                entry.company.toLowerCase().includes(searchTerm) ||
+                entry.note.toLowerCase().includes(searchTerm)
+            );
+            displayFilteredEntries(filteredEntries);
+        }
+
+        function displayFilteredEntries(filteredEntries) {
+            const entriesContainer = document.getElementById("entries");
+            entriesContainer.innerHTML = "";
+            filteredEntries.forEach((entry, index) => {
+                const entryDiv = document.createElement("div");
+                entryDiv.className = "entry";
+                entryDiv.innerHTML = `
+                    <div>
+                        <strong>${entry.id}. ${entry.fullName}</strong><br>
+                        ${entry.number}<br>
+                        ${entry.email}<br>
+                        ${entry.company}<br>
+                        ${entry.note}
+                    </div>
+                    <div class="actions" onclick="toggleMenu(event, ${index})">
+                        <span class="dots">⋮</span>
+                        <div class="menu">
+                            <button onclick="editEntry(${index})">Edit</button>
+                            <button onclick="duplicateEntry(${index})">Duplicate</button>
+                            <button onclick="removeEntry(${index})">Remove</button>
+                            <button onclick="viewEntry(${index})">View</button>
+                        </div>
+                    </div>
+                `;
+                entriesContainer.appendChild(entryDiv);
+            });
+        }
+
+        function exportData() {
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                ["ID,Full Name,Number,Email,Company,Note", ...entries.map(e => 
+                `${e.id},${e.fullName},${e.number},${e.email},${e.company},${e.note}`)]
+                .join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "CRM_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
